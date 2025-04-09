@@ -154,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                               }
                             },
                             child: const Text(
-                              'SIGN IN',
+                              'LOGIN',
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.bold),
                             ),
@@ -170,13 +170,13 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             const Text(
                               'Don\'t have an account? ',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w300),
                             ),
                             GestureDetector(
                               onTap: () {
                                 Navigator.pushNamed(context, '/RegisterPage');
                               },
-                              child: const Text('Sign up..'),
+                              child: const Text('Register here..'),
                             ),
                           ],
                         ),

@@ -4,6 +4,18 @@ import 'package:flutter/material.dart';
 
 Future<void> registerUser(String email, String matricNumber, String department,
     String fullName, BuildContext context) async {
+
+  // Show loading dialog
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing by tapping outside
+    builder: (BuildContext context) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    },
+  );
+
   try {
     // Step 1: Create user with email and a dummy password
     UserCredential userCredential =
@@ -34,14 +46,16 @@ Future<void> registerUser(String email, String matricNumber, String department,
     //delay for one second
     await Future.delayed(const Duration(seconds: 1),);
 
-    // Check mounted after the async gap and Go back to the login page
+    // Check mounted after the async gap and Go to Dashboard
     if (context.mounted) {
-      Navigator.pop(context);
+      Navigator.pushReplacementNamed(
+          context, '/Dashboard');
     }
 
     // If error occurs during registration
   } on FirebaseAuthException catch (e) {
     if(context.mounted){
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error during registration: ${e.code}", overflow: TextOverflow.ellipsis),

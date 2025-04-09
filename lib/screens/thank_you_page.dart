@@ -32,6 +32,7 @@ class _ThankYouPageState extends State<ThankYouPage> {
   @override
   Widget build(BuildContext context) {
   final double heights = MediaQuery.of(context).size.height;
+  final double widths = MediaQuery.of(context).size.width;
 
     return PopScope(
       canPop: false,
@@ -59,11 +60,17 @@ class _ThankYouPageState extends State<ThankYouPage> {
                   SizedBox(height: heights * 0.02),
                   const Text('Your quiz result has been successfully submitted, thanks for joining us today.', textAlign : TextAlign.center, maxLines: 2,),
                   SizedBox(height: heights * 0.02),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await signOutUser(context);
-                    },
-                    child: const Text('Close'),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: widths * 0.1),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlueAccent[100],
+                      ),
+                      onPressed: () async {
+                        await signOutUser(context);
+                      },
+                      child: const Center(child: Text('Close')),
+                    ),
                   ),
                 ],
                         ),

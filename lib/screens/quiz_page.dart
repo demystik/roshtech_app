@@ -13,6 +13,7 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+
   List<Map<String, dynamic>> questions = [];
   Map<String, List<Map<String, dynamic>>> courseQuestions =
       {}; // Track questions by course
@@ -24,6 +25,8 @@ class _QuizPageState extends State<QuizPage> {
   int timeRemaining = 1800; // This is 30 minutes in seconds
   Timer? timer;
   String currentCourse = ''; // Track current course being tested
+  bool lastQuestion = false;
+  List<String?> userAnswers = List<String?>.filled(30, null);
 
   @override
   void initState() {
@@ -46,6 +49,9 @@ class _QuizPageState extends State<QuizPage> {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (timeRemaining > 0) {
+          if (timeRemaining < 60) {
+            lastQuestion = true;
+          }
           timeRemaining--;
         } else {
           timer.cancel();
@@ -63,7 +69,6 @@ class _QuizPageState extends State<QuizPage> {
       questions.addAll(courseQs.map(
           (q) => {...q, 'course': course})); // Add course info to each question
     }
-
     // Set the current course to the first one
     if (widget.selectedCourses.isNotEmpty) {
       currentCourse = widget.selectedCourses.first;
@@ -75,10 +80,9 @@ class _QuizPageState extends State<QuizPage> {
   void submitAnswer(String answer) {
     setState(() {
       selectedAnswer = answer;
+      userAnswers[currentQuestionIndex] = selectedAnswer;
     });
-  }
 
-  void moveToNextQuestion() {
     String correctAnswer = questions[currentQuestionIndex]['correctAnswer'];
     String questionCourse = questions[currentQuestionIndex]['course'];
 
@@ -88,12 +92,13 @@ class _QuizPageState extends State<QuizPage> {
         scores[questionCourse] = (scores[questionCourse] ?? 0) + 1;
       });
     }
+  }
 
-    // Move to next question or course
-    if (currentQuestionIndex < questions.length - 1) {
+  void moveToPreviousQuestion() {
+    if (currentQuestionIndex > 0) {
       setState(() {
-        currentQuestionIndex++;
-        selectedAnswer = null;
+        currentQuestionIndex--;
+        selectedAnswer = userAnswers[currentQuestionIndex];
 
         // Update current course if we've moved to questions from a different course
         String newCourse = questions[currentQuestionIndex]['course'];
@@ -101,13 +106,44 @@ class _QuizPageState extends State<QuizPage> {
           currentCourse = newCourse;
         }
       });
+    }
+  }
+
+  void moveToNextQuestion() {
+    // Move to next question or course
+    if (currentQuestionIndex < questions.length - 1) {
+      setState(() {
+        currentQuestionIndex++;
+        selectedAnswer = userAnswers[currentQuestionIndex];
+
+        // Update current course if we've moved to questions from a different course
+        String newCourse = questions[currentQuestionIndex]['course'];
+        if (newCourse != currentCourse) {
+          currentCourse = newCourse;
+        }
+
+        //Check for last question
+        if (currentQuestionIndex == questions.length - 1) {
+          lastQuestion = true;
+        }
+      });
     } else {
-      endQuiz(context);
+      // endQuiz(context);
     }
   }
 
   void endQuiz(BuildContext currentContext) async {
     timer?.cancel();
+    //show circular indicator while submitting result
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
     Map<String, String> userData = await getUserData();
     String fullName = userData['fullName'] ?? "Unknown";
     String matricNumber = userData['matricNumber'] ?? "Unknown";
@@ -116,12 +152,15 @@ class _QuizPageState extends State<QuizPage> {
     await saveResultsToFirestore(fullName, matricNumber, scores, questions);
 
     if (context.mounted) {
+      Navigator.of(currentContext).pop();
       Navigator.pushReplacementNamed(currentContext, '/ThankYouPage');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // double _height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     if (questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text("Loading...")),
@@ -168,7 +207,10 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 Text(
                   "Question ${currentQuestionIndex + 1} of ${questions.length}",
-                  style: const TextStyle(
+                  style: userAnswers[currentQuestionIndex] != null ? const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.green) : const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w300,
                       color: Colors.deepPurple),
@@ -207,19 +249,61 @@ class _QuizPageState extends State<QuizPage> {
                   );
                 }),
                 const SizedBox(height: 20),
+                /*
+                * Previous and Next Buttons
+                */
                 Row(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          // elevation: 4.0,
+                          backgroundColor: Colors.lightBlueAccent[100],
+                        ),
+                        onPressed: currentQuestionIndex > 0
+                            ? moveToPreviousQuestion
+                            : null,
+                        // selectedAnswer != null ? moveToNextQuestion : null,
+                        child: const Text("Previous"),
+                      ),
+                    ),
                     const Spacer(),
                     Padding(
                       padding: const EdgeInsets.only(right: 20.0),
                       child: ElevatedButton(
-                        onPressed:
-                            selectedAnswer != null ? moveToNextQuestion : null,
+                        style: ElevatedButton.styleFrom(
+                          // elevation: 4.0,
+                          backgroundColor: Colors.lightBlueAccent[100],
+                        ),
+                        onPressed: currentQuestionIndex < questions.length - 1
+                            ? moveToNextQuestion
+                            : null,
                         child: const Text("Next"),
                       ),
                     ),
                   ],
                 ),
+                const Spacer(),
+                // Submit Button
+                if (lastQuestion == true)
+                  Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: width * 0.7,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[600],
+                        ),
+                        onPressed: () => endQuiz(context),
+                        child: const Text(
+                          'Submit',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                const Spacer(),
               ],
             ),
           ),
@@ -228,4 +312,3 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 }
-

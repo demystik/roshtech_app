@@ -1,55 +1,117 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+
 Future<List<Map<String, dynamic>>> getFirstResultsPerUser() async {
-  // Group by user and get earliest timestamp using Firestore query
-  final query = FirebaseFirestore.instance
-      .collection('results')
-      .orderBy('userId')
-      .orderBy('timestamp');
+  try {
+    print('⏳ Starting to fetch quiz results...');
 
-  final snapshot = await query.get();
+    // Get all documents ordered by timestamp (earliest first)
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('quiz_result')
+        .orderBy('timestamp')
+        .get();
 
-  // Process to get first result per user
-  final Map<String, Map<String, dynamic>> firstResults = {};
+    print('✅ Successfully fetched ${snapshot.docs.length} raw documents');
 
-  for (final doc in snapshot.docs) {
-    final data = doc.data();
-    final userId = data['userId'] as String;
-
-    if (!firstResults.containsKey(userId)) {
-      firstResults[userId] = data;
+    // Print all raw documents for verification
+    print('\n📄 RAW DOCUMENTS:');
+    for (var i = 0; i < snapshot.docs.length; i++) {
+      final doc = snapshot.docs[i];
+      print('[Document ${i + 1}] ID: ${doc.id}');
+      print('Data: ${doc.data()}');
+      print('-----------------------');
     }
-  }
 
-  return firstResults.values.toList();
+    // Group by matricNumber
+    final Map<String, Map<String, dynamic>> firstResults = {};
+    int duplicateCount = 0;
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final matricNumber = data['matricNumber'] as String;
+
+      if (!firstResults.containsKey(matricNumber)) {
+        firstResults[matricNumber] = {
+          'fullName': data['fullName'],
+          'matricNumber': matricNumber,
+          'scores': data['scores'],
+          'percent': data['totalPercentage'],
+        };
+      } else {
+        duplicateCount++;
+      }
+    }
+
+    print('\n🔍 PROCESSED RESULTS:');
+    print('• Unique users: ${firstResults.length}');
+    print('• Duplicates skipped: $duplicateCount');
+
+    // Print all processed results
+    print('\n🏆 FINAL RESULTS:');
+    firstResults.forEach((matric, result) {
+      print('Matric: $matric');
+      print('Name: ${result['fullName']}');
+      print('Scores: ${result['scores']}');
+      print('Percentage: ${result['percent']}%');
+      print('-----------------------');
+    });
+
+    return firstResults.values.toList();
+  } catch (e) {
+    print('❌ ERROR in getFirstResultsPerUser: $e');
+    return [];
+  }
 }
 
+
+
+
+
 // Future<List<Map<String, dynamic>>> getFirstResultsPerUser() async {
-//   // First get all unique user IDs
-//   final userIdsSnapshot = await FirebaseFirestore.instance
-//       .collection('results')
-//       .orderBy('userId')
-//       .get();
-//
-//   final userIds = userIdsSnapshot.docs
-//       .map((doc) => doc['userId'] as String)
-//       .toSet()
-//       .toList();
-//
-//   // Then get first result for each user
-//   List<Map<String, dynamic>> firstResults = [];
-//
-//   for (final userId in userIds) {
-//     final snapshot = await FirebaseFirestore.instance
-//         .collection('results')
-//         .where('userId', isEqualTo: userId)
+//   try {
+//     // Get all documents ordered by timestamp (earliest first)
+//     final QuerySnapshot snapshot = await FirebaseFirestore.instance
+//         .collection('quiz_result')
 //         .orderBy('timestamp')
-//         .limit(1)
 //         .get();
 //
-//     if (snapshot.docs.isNotEmpty) {
-//       firstResults.add(snapshot.docs.first.data());
-//     }
-//   }
+//     // Group by matricNumber (assuming this is the unique user identifier)
+//     final Map<String, Map<String, dynamic>> firstResults = {};
 //
-//   return firstResults;
+//     for (final doc in snapshot.docs) {
+//       final data = doc.data() as Map<String, dynamic>;
+//       final matricNumber = data['matricNumber'] as String; // Using matricNumber as user identifier
+//
+//       // Only keep the first result for each matricNumber
+//       if (!firstResults.containsKey(matricNumber)) {
+//         firstResults[matricNumber] = {
+//           'fullName': data['fullName'],
+//           'matricNumber': matricNumber,
+//           // 'timestamp': data['timestamp'],
+//           'scores' : data['scores'],
+//           'percent' : data['totalPercentage'],
+//           // 'documentId': doc.id, // Include document ID if needed
+//         };
+//       }
+//     }
+//
+//     return firstResults.values.toList();
+//   } catch (e) {
+//     print('Error in getFirstResultsPerUser: $e');
+//     return [];
+//   }
 // }
+//
+
+
+
+
+
+
+
+
+
+
+

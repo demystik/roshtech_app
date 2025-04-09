@@ -2,26 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 
-class WelcomePage extends StatefulWidget {
+class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
 
-  @override
-  State<WelcomePage> createState() => _WelcomePageState();
-}
-
-class _WelcomePageState extends State<WelcomePage> {
-
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    // Future.delayed(const Duration(seconds: 2), (){
-    //   if(mounted) {
-    //     Navigator.pushNamed(context, '/loginPage');
-    //   }
-    // });
-  }
   @override
   Widget build(BuildContext context) {
     return SafeArea(

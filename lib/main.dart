@@ -1,11 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:roshtech/firebase_options.dart';
+import 'package:roshtech/screens/dashboard.dart';
 import 'package:roshtech/screens/home.dart';
 import 'package:roshtech/screens/login_page.dart';
 import 'package:roshtech/screens/register_page.dart';
 import 'package:roshtech/screens/thank_you_page.dart';
 import 'package:roshtech/screens/welcome_page.dart';
+
 
 
 
@@ -34,7 +37,31 @@ class MyApp extends StatelessWidget {
         '/RegisterPage' : (context) => const RegisterPage(),
         '/home' : (context) => const HomeScreen(),
         '/ThankYouPage' : (context) => const ThankYouPage(),
+        '/dashboard' : (context) => const Dashboard(),
       },
     );
   }
 }
+
+
+// class AuthGate extends StatelessWidget {
+//   const AuthGate({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return StreamBuilder<User?>(
+//       stream: FirebaseAuth.instance.authStateChanges(),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Center(child: CircularProgressIndicator());
+//         } else if (snapshot.hasData) {
+//           // ✅ User is logged in
+//           return const Dashboard();
+//         } else {
+//           // ❌ No user is logged in
+//           return const WelcomePage();
+//         }
+//       },
+//     );
+//   }
+// }

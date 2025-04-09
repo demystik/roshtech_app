@@ -63,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         Spacer(),
                         Text(
                           // textAlign: TextAlign.start,
-                          'Sign Up',
+                          'Register',
                           style: TextStyle(
                               fontSize: 50,
                               height: 0.9,
@@ -73,7 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           height: 5,
                         ),
                         Text(
-                          'Hello! Sign up and join us',
+                          'Hello! Sign up and join us 😎',
                           style: TextStyle(fontSize: 16),
                         ),
                       ],
@@ -198,7 +198,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               }
                             },
                             child: const Text(
-                              'SIGN UP',
+                              'REGISTER',
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.bold),
                             ),
@@ -220,7 +220,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               onTap: () {
                                 Navigator.pop(context);
                               },
-                              child: const Text('Sign in..'),
+                              child: const Text('Sign in..', style: TextStyle(color: Colors.lightBlueAccent),),
                             ),
                           ],
                         ),

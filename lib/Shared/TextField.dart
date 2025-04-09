@@ -1,5 +1,3 @@
-// import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 
 class MyTextField extends StatelessWidget {
@@ -22,7 +20,7 @@ class MyTextField extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
       ),
       child: TextField(
-        // autofillHints: ,
+        // autofillHints: "emailAddress",
         controller: textEditingController,
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
@@ -41,36 +39,4 @@ class MyTextField extends StatelessWidget {
       ),
     );
   }
-}
-
-void test() {
-  List<String> allCourses = [
-    'Math',
-    'Englis',
-    'Computer',
-    'Science',
-  ];
-
-  List<String> selectedCourses = [];
-
-  allCourses.map((course) {
-    return Padding(
-      padding: EdgeInsets.all(8),
-      child: CheckboxListTile(
-        title: Text(course),
-        value: selectedCourses.contains(course),
-        onChanged: (bool? isChanged) {
-          if (isChanged == true) {
-            if (selectedCourses.length < 3) {
-              selectedCourses.add(course);
-            } else {
-              print('You can only select 3 courses');
-            }
-          } else {
-            selectedCourses.remove(course);
-          }
-        },
-      ),
-    );
-  });
 }

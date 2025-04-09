@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:roshtech/screens/quiz_page.dart';
+// import 'package:roshtech/screens/quiz_page.dart';
 import 'dart:async';
+import '../get_data.dart';
 import '../services/get_user_data.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,23 +27,27 @@ class _HomeScreenState extends State<HomeScreen> {
     Map<String, String> userData = await getUserData();
     String fullName = userData['fullName'] ?? "Unknown";
     String userMatricNum = userData['matricNumber'] ?? '';
-    setState(() {
-      userName = fullName;
-      userMatricNumber = userMatricNum;
-    });
+    if (context.mounted) {
+      setState(() {
+        userName = fullName;
+        userMatricNumber = userMatricNum;
+      });
+    }
   }
 
   // Timer(Dur)
   void startTimer() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (timeRemaining > 0) {
-          timeRemaining--;
-        } else {
-          timer.cancel();
-          displayInstruction();
-        }
-      });
+      if (context.mounted) {
+        setState(() {
+          if (timeRemaining > 0) {
+            timeRemaining--;
+          } else {
+            timer.cancel();
+            displayInstruction();
+          }
+        });
+      }
     });
   }
 
@@ -191,22 +197,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: Text(course),
                       value: selectedCourses.contains(course),
                       onChanged: (bool? isChecked) {
-                        setState(() {
-                          if (isChecked == true) {
-                            if (selectedCourses.length < 3) {
-                              selectedCourses.add(course);
+                        if (context.mounted) {
+                          setState(() {
+                            if (isChecked == true) {
+                              if (selectedCourses.length < 3) {
+                                selectedCourses.add(course);
+                              } else {
+                                // Show a message if the user tries to select more than 3 courses
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "You can only select 3 courses")),
+                                );
+                              }
                             } else {
-                              // Show a message if the user tries to select more than 3 courses
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text("You can only select 3 courses")),
-                              );
+                              selectedCourses.remove(course);
                             }
-                          } else {
-                            selectedCourses.remove(course);
-                          }
-                        });
+                          });
+                        }
                       }),
                 ),
               );
@@ -225,7 +233,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () async {
                       if (selectedCourses.length == 3) {
                         // List<Map<String, dynamic>> result = await getFirstResultsPerUser();
-                        //
+                        // // if(context.mounted){
+                        // // showDialog(
+                        // //     context: context,
+                        // //     builder:
+                        // // );
+                        // // }
+                        // // ignore: avoid_print
+                        // print(result.length);
                         // // ignore: avoid_print
                         // print(result);
                         // Navigate to the quiz screen with the selected courses

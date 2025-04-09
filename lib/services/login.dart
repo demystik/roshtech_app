@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 
 Future<void> loginUser(String email, String matricNumber, BuildContext context) async {
 
-
-
   // Show loading dialog
   showDialog(
     context: context,
@@ -35,7 +33,7 @@ Future<void> loginUser(String email, String matricNumber, BuildContext context) 
       if (context.mounted) {
         Navigator.of(context).pop();
         Navigator.pushReplacementNamed(
-            context, '/home');
+            context, '/dashboard');
       }
       // print("Login successful!");
     } else {
@@ -43,11 +41,13 @@ Future<void> loginUser(String email, String matricNumber, BuildContext context) 
 
       if(context.mounted){
         Navigator.of(context).pop();
+        // ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.red,
           shape: StadiumBorder(),
           behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(top: 50),
           content: Text("Invalid matriculation number."),
         ),
       );
@@ -56,8 +56,13 @@ Future<void> loginUser(String email, String matricNumber, BuildContext context) 
   } on FirebaseAuthException catch (e) {
     if(context.mounted){
       Navigator.of(context).pop();
+      // ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          backgroundColor: Colors.red,
+          shape: const StadiumBorder(),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(top: 50),
           content: Text("Error during login: ${e.code}", overflow: TextOverflow.ellipsis),
         ),
       );
