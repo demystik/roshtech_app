@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:roshtech/screens/thank_you_page.dart';
 import 'dart:async';
 import '../services/fetch_random_questions.dart';
-import '../services/get_user_data.dart';
 import '../services/save_result.dart';
 
 class QuizPage extends StatefulWidget {
-  final List<String> selectedCourses;
-  const QuizPage({super.key, required this.selectedCourses});
+  final String selectedCourse;
+  final String userName;
+  final String userMatricNumber;
+  const QuizPage(
+      {super.key,
+      required this.selectedCourse,
+      required this.userName,
+      required this.userMatricNumber});
 
   @override
   State<QuizPage> createState() => _QuizPageState();
 }
 
 class _QuizPageState extends State<QuizPage> {
-
   List<Map<String, dynamic>> questions = [];
-  Map<String, List<Map<String, dynamic>>> courseQuestions =
-      {}; // Track questions by course
+  // Map<String, List<Map<String, dynamic>>> courseQuestions =
+  //     {}; // Track questions by course
+  // int currentCourseIndex = 0;
   int currentQuestionIndex = 0;
-  int currentCourseIndex = 0;
-  Map<String, int> scores =
-      {}; // This will now properly track scores per course
+  Map<String, int> scores = {}; // This will now properly track scores
   String? selectedAnswer;
   int timeRemaining = 1800; // This is 30 minutes in seconds
   Timer? timer;
@@ -28,13 +32,14 @@ class _QuizPageState extends State<QuizPage> {
   bool lastQuestion = false;
   List<String?> userAnswers = List<String?>.filled(30, null);
 
+
   @override
   void initState() {
     super.initState();
     // Initialize scores for all selected courses
-    for (var course in widget.selectedCourses) {
-      scores[course] = 0;
-    }
+    // for (var course in widget.selectedCourses) {
+    scores[widget.selectedCourse] = 0;
+    // }
     loadQuestions();
     startTimer();
   }
@@ -62,18 +67,18 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   Future<void> loadQuestions() async {
+    questions = await fetchRandomQuestions(widget.selectedCourse);
     // Load questions for each course separately
-    for (String course in widget.selectedCourses) {
-      List<Map<String, dynamic>> courseQs = await fetchRandomQuestions(course);
-      courseQuestions[course] = courseQs;
-      questions.addAll(courseQs.map(
-          (q) => {...q, 'course': course})); // Add course info to each question
-    }
+    // for (String course in widget.selectedCourses) {
+    //   List<Map<String, dynamic>> courseQs = await fetchRandomQuestions(course);
+    // courseQuestions[course] = courseQs;
+    // questions.addAll(courseQs.map(
+    //     (q) => {...q, 'course': course})); // Add course info to each question
+    // }
     // Set the current course to the first one
-    if (widget.selectedCourses.isNotEmpty) {
-      currentCourse = widget.selectedCourses.first;
-    }
-
+    // if (widget.selectedCourses.isNotEmpty) {
+    //   currentCourse = widget.selectedCourses.first;
+    // }
     setState(() {});
   }
 
@@ -84,12 +89,14 @@ class _QuizPageState extends State<QuizPage> {
     });
 
     String correctAnswer = questions[currentQuestionIndex]['correctAnswer'];
-    String questionCourse = questions[currentQuestionIndex]['course'];
+    // String questionCourse = questions[currentQuestionIndex]['course'];
 
     // Update score for the specific course
     if (selectedAnswer == correctAnswer) {
       setState(() {
-        scores[questionCourse] = (scores[questionCourse] ?? 0) + 1;
+        // scores[questionCourse] = (scores[questionCourse] ?? 0) + 1;
+        scores[widget.selectedCourse] =
+            (scores[widget.selectedCourse] ?? 0) + 1;
       });
     }
   }
@@ -101,10 +108,10 @@ class _QuizPageState extends State<QuizPage> {
         selectedAnswer = userAnswers[currentQuestionIndex];
 
         // Update current course if we've moved to questions from a different course
-        String newCourse = questions[currentQuestionIndex]['course'];
-        if (newCourse != currentCourse) {
-          currentCourse = newCourse;
-        }
+        // String newCourse = questions[currentQuestionIndex]['course'];
+        // if (newCourse != currentCourse) {
+        //   currentCourse = newCourse;
+        // }
       });
     }
   }
@@ -117,18 +124,16 @@ class _QuizPageState extends State<QuizPage> {
         selectedAnswer = userAnswers[currentQuestionIndex];
 
         // Update current course if we've moved to questions from a different course
-        String newCourse = questions[currentQuestionIndex]['course'];
-        if (newCourse != currentCourse) {
-          currentCourse = newCourse;
-        }
+        // String newCourse = questions[currentQuestionIndex]['course'];
+        // if (newCourse != currentCourse) {
+        //   currentCourse = newCourse;
+        // }
 
         //Check for last question
         if (currentQuestionIndex == questions.length - 1) {
           lastQuestion = true;
         }
       });
-    } else {
-      // endQuiz(context);
     }
   }
 
@@ -144,16 +149,24 @@ class _QuizPageState extends State<QuizPage> {
         );
       },
     );
-    Map<String, String> userData = await getUserData();
-    String fullName = userData['fullName'] ?? "Unknown";
-    String matricNumber = userData['matricNumber'] ?? "Unknown";
-
-    // Save results for each course separately
-    await saveResultsToFirestore(fullName, matricNumber, scores, questions);
+    // Save results for each course
+    await saveResultsToFirestore(widget.userName, widget.userMatricNumber,
+        scores, questions, widget.selectedCourse);
 
     if (context.mounted) {
       Navigator.of(currentContext).pop();
-      Navigator.pushReplacementNamed(currentContext, '/ThankYouPage');
+      Navigator.pushReplacement(
+        currentContext,
+        MaterialPageRoute(
+          builder: (currentContext) => ResultPage(
+              score: scores,
+              courseName: widget.selectedCourse,
+              userName: widget.userName,
+              questions: questions,
+              userAnswers: userAnswers,
+          ),
+        ),
+      );
     }
   }
 
@@ -161,6 +174,7 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     // double _height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    //Loading..
     if (questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text("Loading...")),
@@ -169,7 +183,8 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     Map<String, dynamic> currentQuestion = questions[currentQuestionIndex];
-    String currentCourseName = currentQuestion['course'];
+    // String currentCourseName = currentQuestion['course'];
+    String currentCourseName = widget.selectedCourse;
 
     return PopScope(
       canPop: false,
@@ -189,12 +204,6 @@ class _QuizPageState extends State<QuizPage> {
                         style: const TextStyle(fontSize: 18),
                       ),
                     ),
-                    // Expanded(
-                    //   child: Text(
-                    //     "Score: ${scores[currentCourseName] ?? 0}",
-                    //     style: const TextStyle(fontSize: 14),
-                    //   ),
-                    // ),
                   ],
                 ),
               ),
@@ -207,13 +216,15 @@ class _QuizPageState extends State<QuizPage> {
               children: [
                 Text(
                   "Question ${currentQuestionIndex + 1} of ${questions.length}",
-                  style: userAnswers[currentQuestionIndex] != null ? const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.green) : const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.deepPurple),
+                  style: userAnswers[currentQuestionIndex] != null
+                      ? const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.green)
+                      : const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.deepPurple),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -254,6 +265,7 @@ class _QuizPageState extends State<QuizPage> {
                 */
                 Row(
                   children: [
+                    //Previous Button
                     Padding(
                       padding: const EdgeInsets.only(left: 20.0),
                       child: ElevatedButton(
@@ -269,6 +281,7 @@ class _QuizPageState extends State<QuizPage> {
                       ),
                     ),
                     const Spacer(),
+                    //Next Button
                     Padding(
                       padding: const EdgeInsets.only(right: 20.0),
                       child: ElevatedButton(

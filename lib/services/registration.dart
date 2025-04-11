@@ -48,6 +48,7 @@ Future<void> registerUser(String email, String matricNumber, String department,
 
     // Check mounted after the async gap and Go to Dashboard
     if (context.mounted) {
+    Navigator.of(context).pop();
       Navigator.pushReplacementNamed(
           context, '/Dashboard');
     }
@@ -55,6 +56,7 @@ Future<void> registerUser(String email, String matricNumber, String department,
     // If error occurs during registration
   } on FirebaseAuthException catch (e) {
     if(context.mounted){
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

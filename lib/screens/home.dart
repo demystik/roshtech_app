@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roshtech/screens/quiz_page.dart';
-// import 'package:roshtech/screens/quiz_page.dart';
 import 'dart:async';
-import '../get_data.dart';
 import '../services/get_user_data.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Track selected courses
   final List<String> selectedCourses = [];
+  late String? selectedCourse = '';
   String userName = '';
   String userMatricNumber = '';
   // Timer? timer;
@@ -72,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.deepPurple,
                           )),
                       Text(
-                        'You\'re to select 3 courses only',
+                        'You\'re to take one course at a time',
                         maxLines: 2,
                         style: TextStyle(fontSize: 15),
                       ),
@@ -120,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     // TODO: implement initState
-    startTimer();
+    // startTimer();
     setUser();
     super.initState();
   }
@@ -182,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const Text(
-              "Select 3 out of 4 courses:",
+              "Select any course below:",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
@@ -195,23 +194,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: CheckboxListTile(
                       tileColor: Colors.greenAccent,
                       title: Text(course),
-                      value: selectedCourses.contains(course),
+                      value: selectedCourse == course,
                       onChanged: (bool? isChecked) {
                         if (context.mounted) {
                           setState(() {
                             if (isChecked == true) {
-                              if (selectedCourses.length < 3) {
-                                selectedCourses.add(course);
-                              } else {
-                                // Show a message if the user tries to select more than 3 courses
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          "You can only select 3 courses")),
-                                );
-                              }
-                            } else {
-                              selectedCourses.remove(course);
+                              selectedCourse = course;
                             }
                           });
                         }
@@ -231,31 +219,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Colors.deepPurple,
                     ),
                     onPressed: () async {
-                      if (selectedCourses.length == 3) {
-                        // List<Map<String, dynamic>> result = await getFirstResultsPerUser();
-                        // // if(context.mounted){
-                        // // showDialog(
-                        // //     context: context,
-                        // //     builder:
-                        // // );
-                        // // }
-                        // // ignore: avoid_print
-                        // print(result.length);
-                        // // ignore: avoid_print
-                        // print(result);
-                        // Navigate to the quiz screen with the selected courses
+                      if (selectedCourse != null) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                QuizPage(selectedCourses: selectedCourses),
+                                QuizPage(selectedCourse:selectedCourse ?? '', userName:userName, userMatricNumber: userMatricNumber,),
                           ),
                         );
                       } else {
                         // Show a message if the user hasn't selected exactly 3 courses
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text("Please select exactly 3 courses")),
+                              content: Text("Please select a course")),
                         );
                       }
                     },
