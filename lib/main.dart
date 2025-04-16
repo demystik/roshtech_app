@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:roshtech/firebase_options.dart';
 import 'package:roshtech/screens/dashboard.dart';
 import 'package:roshtech/screens/home.dart';
-import 'package:roshtech/screens/leaderboards.dart';
+import 'package:roshtech/screens/leaderboards_page.dart';
 import 'package:roshtech/screens/login_page.dart';
 import 'package:roshtech/screens/recent_activity.dart';
 import 'package:roshtech/screens/register_page.dart';
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         '/RegisterPage' : (context) => const RegisterPage(),
         '/home' : (context) => const HomeScreen(),
         '/dashboard' : (context) => const Dashboard(),
-        '/leaderboards' : (context) => const LeaderBoards(),
+        '/leaderboards' : (context) => const LeaderBoards(initialCourse: 'mat101'),
         '/recentActivity' : (context) => const RecentActivity(),
       },
     );

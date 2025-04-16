@@ -191,19 +191,28 @@ class _HomeScreenState extends State<HomeScreen> {
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8),
-                  child: CheckboxListTile(
-                      tileColor: Colors.greenAccent,
-                      title: Text(course),
-                      value: selectedCourse == course,
-                      onChanged: (bool? isChecked) {
-                        if (context.mounted) {
-                          setState(() {
-                            if (isChecked == true) {
-                              selectedCourse = course;
-                            }
-                          });
-                        }
-                      }),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: CheckboxListTile(
+                        tileColor: Colors.purple,
+                        selectedTileColor: Colors.cyan,
+                        title: Text(course, style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22
+                        ),),
+                        value: selectedCourse == course,
+                        onChanged: (bool? isChecked) {
+                          if (context.mounted) {
+                            setState(() {
+                              if (isChecked == true) {
+                                selectedCourse = course;
+                              }
+                            });
+                          }
+                        }),
+                  ),
                 ),
               );
             }),
