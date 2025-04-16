@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "649880420832",
+    "project_id": "roshtech-644f8",
+    "storage_bucket": "roshtech-644f8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649880420832:android:a5f4a357b50d0a62af6b85",
+        "android_client_info": {
+          "package_name": "com.demystik.roshtech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCALJLp2l7IQ1AxuxEXIIwQqr2FTi2x_6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
